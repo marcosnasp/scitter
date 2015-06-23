@@ -83,9 +83,11 @@ package com.tedneward.scitter
         val responseXML = XML.loadString(statusBody)
 
         val statusListBuffer = new ListBuffer[Status]
-
-        for (n <- (responseXML \\ "status").elements)
-          statusListBuffer += (Status.fromXml(n))
+        
+        val nodes = (responseXML \\ "status")
+        
+        for (n <- 0 until nodes.size)
+          statusListBuffer += (Status.fromXml(nodes(n)))
         
         statusListBuffer.toList
       }
@@ -144,7 +146,7 @@ package com.tedneward.scitter
           }
           m.setRequestBody(array)
           */
-          dataMap.elements.foreach { (pr) =>
+          dataMap.foreach { (pr) =>
             pr match {
               case (k, v) => m.addParameter(k, v)
             }
@@ -296,8 +298,10 @@ package com.tedneward.scitter
 
         val statusListBuffer = new ListBuffer[Status]
 
-        for (n <- (responseXML \\ "status").elements)
-          statusListBuffer += (Status.fromXml(n))
+        val nodes = (responseXML \\ "status")
+        
+        for (n <- 0 until nodes.size)
+          statusListBuffer += (Status.fromXml(nodes(n)))
         
         statusListBuffer.toList
       }
@@ -360,8 +364,9 @@ package com.tedneward.scitter
 
         val statusListBuffer = new ListBuffer[Status]
 
-        for (n <- (responseXML \\ "status").elements)
-          statusListBuffer += (Status.fromXml(n))
+        val nodes = (responseXML \\ "status")
+        for (n <- 0 until nodes.size)
+          statusListBuffer += (Status.fromXml(nodes(0)))
         
         statusListBuffer.toList
       }
@@ -426,9 +431,11 @@ package com.tedneward.scitter
         val responseXML = XML.loadString(body)
 
         val userListBuffer = new ListBuffer[User]
-
-        for (n <- (responseXML \\ "user").elements)
-          userListBuffer += (User.fromXml(n))
+        
+        val nodes = (responseXML \\ "user")
+        
+        for (n <- 0 until nodes.size)
+          userListBuffer += (User.fromXml(nodes(n)))
         
         userListBuffer.toList
       }
@@ -493,8 +500,10 @@ package com.tedneward.scitter
 
         val userListBuffer = new ListBuffer[User]
 
-        for (n <- (responseXML \\ "user").elements)
-          userListBuffer += (User.fromXml(n))
+        val nodes = (responseXML \\ "user")
+        
+        for (n <- 0 until nodes.size)
+          userListBuffer += (User.fromXml(nodes(n)))
         
         userListBuffer.toList
       }

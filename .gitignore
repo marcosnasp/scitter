@@ -1,0 +1,11 @@
+/bin/
+/target/
+/project/project/
+/project/target/
+/classes/
+/bin/
+.classpath
+.project
+.chache-main
+.cache-tests
+/testsrc
