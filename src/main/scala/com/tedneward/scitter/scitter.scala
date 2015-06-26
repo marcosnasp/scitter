@@ -1,5 +1,4 @@
-package com.tedneward.scitter
-{
+package com.tedneward.scitter {
   import org.apache.commons.httpclient._, auth._, methods._, params._
   import scala.collection.mutable.ListBuffer
   import scala.xml._
@@ -33,8 +32,7 @@ package com.tedneward.scitter
      * Formats: xml, json
      * Method(s): GET
      */
-    def test : Boolean =
-    {
+    def test : Boolean = {
       val (statusCode, statusBody) = execute("http://twitter.com/statuses/public_timeline.xml")
       statusCode == 200
     }
@@ -42,8 +40,7 @@ package com.tedneward.scitter
     /**
      *
      */
-    def rateLimitStatus : Option[RateLimits] =
-    {
+    def rateLimitStatus : Option[RateLimits] = {
       val url = "http://twitter.com/account/rate_limit_status.xml"
       val (statusCode, statusBody) =
         Scitter.execute(url)
@@ -74,12 +71,10 @@ package com.tedneward.scitter
      * API limit: Not applicable
      * Returns: list of status elements     
      */
-    def publicTimeline : List[Status] =
-    {
+    def publicTimeline : List[Status] = {
       val (statusCode, statusBody) = execute("http://twitter.com/statuses/public_timeline.xml")
 
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(statusBody)
 
         val statusListBuffer = new ListBuffer[Status]
@@ -90,9 +85,7 @@ package com.tedneward.scitter
           statusListBuffer += (Status.fromXml(nodes(n)))
         
         statusListBuffer.toList
-      }
-      else
-      {
+      } else {
         Nil
       }
     }
@@ -100,39 +93,30 @@ package com.tedneward.scitter
     /**
      *
      */
-    def show(id : Long) : Option[Status] =
-    {
+    def show(id : Long) : Option[Status] = {
       val (statusCode, body) =
         Scitter.execute("http://twitter.com/statuses/show/" + id + ".xml")
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
         
         Some(Status.fromXml(responseXML))
-      }
-      else
-      {
+      } else {
         None
       }
     }
     
-    private[scitter] def execute(url : String) : (Int, String) =
-      execute(url, Map(), "", "")
-    private[scitter] def execute(url : String, username : String, password : String) : (Int, String) =
-      execute(url, Map(), username, password)
-    private[scitter] def execute(url : String, dataMap : Map[String, String]) : (Int, String) =
-      execute(url, dataMap, "", "")
-    private[scitter] def execute(url : String, dataMap : Map[String, String],
-                                 username : String, password : String) =
-    {
+    private[scitter] def execute(url : String) : (Int, String) = execute(url, Map(), "", "")
+    
+    private[scitter] def execute(url : String, username : String, password : String) : (Int, String) = execute(url, Map(), username, password)
+    
+    private[scitter] def execute(url : String, dataMap : Map[String, String]) : (Int, String) = execute(url, dataMap, "", "")
+    
+    private[scitter] def execute(url : String, dataMap : Map[String, String], username : String, password : String) = {
       val client = new HttpClient()
       val method = 
-        if (dataMap.size == 0)
-        {
+        if (dataMap.size == 0) {
           new GetMethod(url)
-        }
-        else
-        {
+        } else {
           var m = new PostMethod(url)
           
           /*
@@ -158,8 +142,7 @@ package com.tedneward.scitter
       method.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, 
         new DefaultHttpMethodRetryHandler(3, false))
         
-      if ((username != "") && (password != ""))
-      {
+      if ((username != "") && (password != "")) {
         client.getParams().setAuthenticationPreemptive(true)
         client.getState().setCredentials(
           new AuthScope("twitter.com", 80, AuthScope.ANY_REALM),
@@ -171,13 +154,13 @@ package com.tedneward.scitter
       (method.getStatusLine().getStatusCode(), method.getResponseBodyAsString())
     }
   }
+
   /**
    * Class for consuming "authenticated user" Twitter APIs. Each instance is
    * thus "tied" to a particular authenticated user on Twitter, and will
    * behave accordingly (according to the Twitter API documentation).
    */
-  class Scitter(username : String, password : String)
-  {
+  class Scitter(username : String, password : String) {
     /**
      * Verify the user credentials against Twitter.
      *
@@ -192,8 +175,7 @@ package com.tedneward.scitter
      * Formats: xml, json
      * Method(s): GET
      */
-    def verifyCredentials : Boolean =
-    {
+    def verifyCredentials : Boolean = {
       val (statusCode, statusBody) =
         Scitter.execute("http://twitter.com/account/verify_credentials.xml", username, password)
 
@@ -203,8 +185,7 @@ package com.tedneward.scitter
     /**
      *
      */
-    def endSession : Boolean =
-    {
+    def endSession : Boolean = {
       val (statusCode, statusBody) =
         Scitter.execute("http://twitter.com/account/end_session.xml",
           Map("" -> ""), username, password)
@@ -215,19 +196,14 @@ package com.tedneward.scitter
     /**
      *
      */
-    def rateLimitStatus : Option[RateLimits] =
-    {
+    def rateLimitStatus : Option[RateLimits] = {
       val url = "http://twitter.com/account/rate_limit_status.xml"
       val (statusCode, statusBody) =
         Scitter.execute(url, username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(statusBody)
-        
         Some(RateLimits.fromXml(responseXML))
-      }
-      else
-      {
+      } else {
         None
       }
     }
@@ -266,34 +242,24 @@ package com.tedneward.scitter
      * * page. Optional. Ex: http://twitter.com/statuses/user_timeline.rss?page=3
      * Returns: list of status elements
      */
-    def userTimeline(options : OptionalParam*) : List[Status] =
-    {
+    def userTimeline(options : OptionalParam*) : List[Status] = {
       val url = "http://twitter.com/statuses/user_timeline"
       var urlId = ".xml"
       val optionsStr = new StringBuffer("?")
-      for (option <- options)
-      {
-        option match
-        {
-          case Id(id) =>
-            urlId = "/" + id.toString() + ".xml"
-          case UserId(user_id) =>
-            optionsStr.append("user_id=" + user_id.toString() + "&")
-          case Since(since_id) =>
-            optionsStr.append("since_id=" + since_id.toString() + "&")
-          case Max(max_id) =>
-            optionsStr.append("max_id=" + max_id.toString() + "&")
-          case Count(count) =>
-            optionsStr.append("count=" + count.toString() + "&")
-          case Page(page) =>
-            optionsStr.append("page=" + page.toString() + "&")
+      for (option <- options) {
+        option match {
+          case Id(id) => urlId = "/" + id.toString() + ".xml"
+          case UserId(user_id) => optionsStr.append("user_id=" + user_id.toString() + "&")
+          case Since(since_id) => optionsStr.append("since_id=" + since_id.toString() + "&")
+          case Max(max_id) => optionsStr.append("max_id=" + max_id.toString() + "&")
+          case Count(count) => optionsStr.append("count=" + count.toString() + "&")
+          case Page(page) => optionsStr.append("page=" + page.toString() + "&")
         }
       }
       
-      val (statusCode, statusBody) =
+      val (statusCode, statusBody) = 
         Scitter.execute(url + urlId + optionsStr.toString(), username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(statusBody)
 
         val statusListBuffer = new ListBuffer[Status]
@@ -304,9 +270,7 @@ package com.tedneward.scitter
           statusListBuffer += (Status.fromXml(nodes(n)))
         
         statusListBuffer.toList
-      }
-      else
-      {
+      } else {
         Nil
       }
     }
@@ -337,29 +301,21 @@ package com.tedneward.scitter
      * Ex: http://twitter.com/statuses/friends_timeline.rss?page=3
      * Returns: list of status elements
      */
-    def friendsTimeline(options : OptionalParam*) : List[Status] =
-    {
+    def friendsTimeline(options : OptionalParam*) : List[Status] = {
       val optionsStr =
         new StringBuffer("http://twitter.com/statuses/friends_timeline.xml?")
-      for (option <- options)
-      {
-        option match
-        {
-          case Since(since_id) =>
-            optionsStr.append("since_id=" + since_id.toString() + "&")
-          case Max(max_id) =>
-            optionsStr.append("max_id=" + max_id.toString() + "&")
-          case Count(count) =>
-            optionsStr.append("count=" + count.toString() + "&")
-          case Page(page) =>
-            optionsStr.append("page=" + page.toString() + "&")
+      for (option <- options) {
+        option match {
+          case Since(since_id) => optionsStr.append("since_id=" + since_id.toString() + "&")
+          case Max(max_id) => optionsStr.append("max_id=" + max_id.toString() + "&")
+          case Count(count) => optionsStr.append("count=" + count.toString() + "&")
+          case Page(page) => optionsStr.append("page=" + page.toString() + "&")
         }
       }
       
       val (statusCode, statusBody) =
         Scitter.execute(optionsStr.toString(), username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(statusBody)
 
         val statusListBuffer = new ListBuffer[Status]
@@ -369,9 +325,8 @@ package com.tedneward.scitter
           statusListBuffer += (Status.fromXml(nodes(0)))
         
         statusListBuffer.toList
-      }
-      else
-      {
+        
+      } else {
         Nil
       }
     }
@@ -407,27 +362,19 @@ package com.tedneward.scitter
     {
       val optionsStr =
         new StringBuffer("http://twitter.com/statuses/friends.xml?")
-      for (option <- options)
-      {
-        option match
-        {
-          case Id(id) =>
-            optionsStr.append("id=" + id.toString() + "&")
-          case UserId(user_id) =>
-            optionsStr.append("user_id=" + user_id.toString() + "&")
-          case ScreenName(screen_name) =>
-            optionsStr.append("screen_name=" + screen_name.toString() + "&")
-          case Page(page) =>
-            optionsStr.append("page=" + page.toString() + "&")
-          case _ =>
-            // Do nothing
+      for (option <- options) {
+        option match {
+          case Id(id) => optionsStr.append("id=" + id.toString() + "&")
+          case UserId(user_id) => optionsStr.append("user_id=" + user_id.toString() + "&")
+          case ScreenName(screen_name) => optionsStr.append("screen_name=" + screen_name.toString() + "&")
+          case Page(page) => optionsStr.append("page=" + page.toString() + "&")
+          case _ => // Do nothing
         }
       }
       
       val (statusCode, body) =
         Scitter.execute(optionsStr.toString(), username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
 
         val userListBuffer = new ListBuffer[User]
@@ -438,9 +385,7 @@ package com.tedneward.scitter
           userListBuffer += (User.fromXml(nodes(n)))
         
         userListBuffer.toList
-      }
-      else
-      {
+      } else {
         Nil
       }
     }
@@ -475,27 +420,19 @@ package com.tedneward.scitter
     {
       val optionsStr =
         new StringBuffer("http://twitter.com/statuses/followers.xml?")
-      for (option <- options)
-      {
-        option match
-        {
-          case Id(id) =>
-            optionsStr.append("id=" + id.toString() + "&")
-          case UserId(user_id) =>
-            optionsStr.append("user_id=" + user_id.toString() + "&")
-          case ScreenName(screen_name) =>
-            optionsStr.append("screen_name=" + screen_name.toString() + "&")
-          case Page(page) =>
-            optionsStr.append("page=" + page.toString() + "&")
-          case _ =>
-            // Do nothing
+      for (option <- options) {
+        option match {
+          case Id(id) => optionsStr.append("id=" + id.toString() + "&")
+          case UserId(user_id) => optionsStr.append("user_id=" + user_id.toString() + "&")
+          case ScreenName(screen_name) => optionsStr.append("screen_name=" + screen_name.toString() + "&")
+          case Page(page) => optionsStr.append("page=" + page.toString() + "&")
+          case _ => // Do nothing
         }
       }
       
-      val (statusCode, body) =
-        Scitter.execute(optionsStr.toString(), username, password)
-      if (statusCode == 200)
-      {
+      val (statusCode, body) = Scitter.execute(optionsStr.toString(), username, password)
+      
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
 
         val userListBuffer = new ListBuffer[User]
@@ -506,25 +443,19 @@ package com.tedneward.scitter
           userListBuffer += (User.fromXml(nodes(n)))
         
         userListBuffer.toList
-      }
-      else
-      {
+      } else {
         Nil
       }
     }
     
-    def show(id : Long) : Option[Status] =
-    {
+    def show(id : Long) : Option[Status] = {
       val (statusCode, body) =
         Scitter.execute("http://twitter.com/statuses/show/" + id + ".xml", username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
         
         Some(Status.fromXml(responseXML))
-      }
-      else
-      {
+      } else {
         None
       }
     }
@@ -532,19 +463,13 @@ package com.tedneward.scitter
     /**
      *
      */
-    def update(message : String, options : OptionalParam*) : Option[Status] =
-    {
-      def optionsToMap(options : List[OptionalParam]) : Map[String, String]=
-      {
-        options match
-        {
-          case hd :: tl =>
-            hd match {
-              case InReplyToStatusId(id) =>
-                Map("in_reply_to_status_id" -> id.toString) ++ optionsToMap(tl)
-              case _ =>
-                optionsToMap(tl)
-            }
+    def update(message : String, options : OptionalParam*) : Option[Status] = {
+      def optionsToMap(options : List[OptionalParam]) : Map[String, String]= {
+        options match {
+          case hd :: tl => hd match {
+              case InReplyToStatusId(id) => Map("in_reply_to_status_id" -> id.toString) ++ optionsToMap(tl)
+              case _ => optionsToMap(tl)
+          }
           case List() => Map()
         }
       }
@@ -553,14 +478,11 @@ package com.tedneward.scitter
     
       val (statusCode, body) =
         Scitter.execute("http://twitter.com/statuses/update.xml", paramsMap, username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
         
         Some(Status.fromXml(responseXML))
-      }
-      else
-      {
+      } else {
         None
       }
     }
@@ -568,30 +490,26 @@ package com.tedneward.scitter
     /**
      *
      */
-    def destroy(id : Long) : Option[Status] =
-    {
+    def destroy(id : Long) : Option[Status] = {
       val paramsMap = Map("id" -> id.toString())
     
       val (statusCode, body) =
         Scitter.execute("http://twitter.com/statuses/destroy/" + id.toString() + ".xml",
           paramsMap, username, password)
-      if (statusCode == 200)
-      {
+      if (statusCode == 200) {
         val responseXML = XML.loadString(body)
         
         Some(Status.fromXml(responseXML))
-      }
-      else if (statusCode == 400)
-      {
+      } else if (statusCode == 400) {
         val responseXML = XML.loadString(body)
         
         /*
         Current testing indicates Twitter returns this:
         
-<hash>
-  <request>/statuses/destroy/3707808368.xml</request>
-  <error>We could not delete that status for some reason.</error>
-</hash>
+        <hash>
+          <request>/statuses/destroy/3707808368.xml</request>
+          <error>We could not delete that status for some reason.</error>
+        </hash>
 
         ...in the event that it can't delete a status.
          */
@@ -608,8 +526,7 @@ package com.tedneward.scitter
         None
       }
     }
-    def destroy(id : Id) : Option[Status] =
-      destroy(id.id.toLong)
+    def destroy(id : Id) : Option[Status] = destroy(id.id.toLong)
 
     /**
      * Twitter docs say:
